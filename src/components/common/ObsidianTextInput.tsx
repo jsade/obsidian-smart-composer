@@ -7,12 +7,14 @@ type ObsidianTextInputProps = {
   value: string
   placeholder?: string
   onChange: (value: string) => void
+  disabled?: boolean
 }
 
 export function ObsidianTextInput({
   value,
   placeholder,
   onChange,
+  disabled,
 }: ObsidianTextInputProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const { setting } = useObsidianSetting()
@@ -45,7 +47,8 @@ export function ObsidianTextInput({
     textComponent.setValue(value)
     if (placeholder) textComponent.setPlaceholder(placeholder)
     textComponent.onChange(onChange)
-  }, [textComponent, value, onChange, placeholder])
+    textComponent.inputEl.disabled = disabled ?? false
+  }, [textComponent, value, onChange, placeholder, disabled])
 
   return <div ref={containerRef} />
 }

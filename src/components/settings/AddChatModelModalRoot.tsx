@@ -12,21 +12,25 @@ import { ObsidianTextInput } from '../common/ObsidianTextInput'
 type AddChatModelModalRootProps = {
   plugin: SmartComposerPlugin
   onClose: () => void
+  existingModel?: ChatModel
 }
 
 export default function AddChatModelModalRoot({
   plugin,
   onClose,
+  existingModel,
 }: AddChatModelModalRootProps) {
-  const [formData, setFormData] = useState<ChatModel>({
-    providerId: DEFAULT_PROVIDERS[0].id,
-    providerType: DEFAULT_PROVIDERS[0].type,
-    id: '',
-    model: '',
-  })
+  const [formData, setFormData] = useState<ChatModel>(
+    existingModel ?? {
+      providerId: DEFAULT_PROVIDERS[0].id,
+      providerType: DEFAULT_PROVIDERS[0].type,
+      id: '',
+      model: '',
+    },
+  )
 
   const handleSubmit = async () => {
-    if (plugin.settings.chatModels.some((p) => p.id === formData.id)) {
+    if (!existingModel && plugin.settings.chatModels.some((p) => p.id === formData.id)) {
       new Notice('Model with this ID already exists. Try a different ID.')
       return
     }
@@ -46,10 +50,21 @@ export default function AddChatModelModalRoot({
       return
     }
 
-    await plugin.setSettings({
-      ...plugin.settings,
-      chatModels: [...plugin.settings.chatModels, formData],
-    })
+    if (existingModel) {
+      // Update existing model
+      await plugin.setSettings({
+        ...plugin.settings,
+        chatModels: plugin.settings.chatModels.map((model) =>
+          model.id === existingModel.id ? formData : model
+        ),
+      })
+    } else {
+      // Add new model
+      await plugin.setSettings({
+        ...plugin.settings,
+        chatModels: [...plugin.settings.chatModels, formData],
+      })
+    }
 
     onClose()
   }
@@ -67,6 +82,7 @@ export default function AddChatModelModalRoot({
           onChange={(value: string) =>
             setFormData((prev) => ({ ...prev, id: value }))
           }
+          disabled={!!existingModel}
         />
       </ObsidianSetting>
 
@@ -106,8 +122,29 @@ export default function AddChatModelModalRoot({
         />
       </ObsidianSetting>
 
+      {formData.providerType === 'openai' && (
+        <ObsidianSetting
+          name="Max Tokens"
+          desc={formData.model === 'o1' 
+            ? "Maximum number of tokens to generate (will be sent as max_completion_tokens for o1 model). Leave empty for default."
+            : "Maximum number of tokens to generate. Leave empty for default."}
+        >
+          <ObsidianTextInput
+            value={formData.maxTokens?.toString() ?? ''}
+            placeholder="Enter max tokens"
+            onChange={(value: string) => {
+              const maxTokens = parseInt(value, 10)
+              setFormData((prev) => ({
+                ...prev,
+                maxTokens: isNaN(maxTokens) ? undefined : maxTokens,
+              }))
+            }}
+          />
+        </ObsidianSetting>
+      )}
+
       <ObsidianSetting>
-        <ObsidianButton text="Add" onClick={handleSubmit} cta />
+        <ObsidianButton text={existingModel ? "Save" : "Add"} onClick={handleSubmit} cta />
         <ObsidianButton text="Cancel" onClick={onClose} />
       </ObsidianSetting>
     </>

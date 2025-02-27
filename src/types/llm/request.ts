@@ -53,4 +53,5 @@ export type RequestMessage = {
 
 export type LLMOptions = {
   signal?: AbortSignal
+  maxTokens?: number
 }

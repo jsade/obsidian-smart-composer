@@ -1,4 +1,4 @@
-import { Trash2 } from 'lucide-react'
+import { Pencil, Trash2 } from 'lucide-react'
 import { App, Notice } from 'obsidian'
 import { ObsidianToggle } from 'src/components/common/ObsidianToggle'
 
@@ -6,6 +6,7 @@ import { DEFAULT_CHAT_MODELS } from '../../../../constants'
 import { useSettings } from '../../../../contexts/settings-context'
 import SmartComposerPlugin from '../../../../main'
 import { AddChatModelModal } from '../../../../settings/AddChatModelModal'
+import { EditChatModelModal } from '../../../../settings/EditChatModelModal'
 
 type ChatModelsSubSectionProps = {
   app: App
@@ -76,7 +77,7 @@ export function ChatModelsSubSection({
             <col />
             <col />
             <col width={60} />
-            <col width={60} />
+            <col width={100} />
           </colgroup>
           <thead>
             <tr>
@@ -103,6 +104,13 @@ export function ChatModelsSubSection({
                 </td>
                 <td>
                   <div className="smtcmp-settings-actions">
+                    <button
+                      onClick={() => {
+                        new EditChatModelModal(app, plugin, chatModel).open()
+                      }}
+                    >
+                      <Pencil size={16} />
+                    </button>
                     {!DEFAULT_CHAT_MODELS.some(
                       (v) => v.id === chatModel.id,
                     ) && (

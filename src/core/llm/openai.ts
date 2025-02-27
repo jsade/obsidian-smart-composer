@@ -56,7 +56,10 @@ export class OpenAIAuthenticatedProvider extends BaseLLMProvider<
       const response = await this.adapter.generateResponse(
         this.client,
         request,
-        options,
+        {
+          ...options,
+          maxTokens: model.maxTokens,
+        },
       )
 
       // Ensure choices exist and have at least one choice
@@ -142,7 +145,10 @@ export class OpenAIAuthenticatedProvider extends BaseLLMProvider<
     }
     try {
       // The adapter.streamResponse already returns AsyncIterable<LLMResponseStreaming>
-      return await this.adapter.streamResponse(this.client, request, options)
+      return await this.adapter.streamResponse(this.client, request, {
+        ...options,
+        maxTokens: model.maxTokens,
+      })
     } catch (error) {
       console.error('Error in streamResponse:', error)
       if (error instanceof OpenAI.AuthenticationError) {
