@@ -23,17 +23,16 @@ export class OpenAIMessageAdapter {
     request: LLMRequestNonStreaming,
     options?: LLMOptions,
   ): Promise<LLMResponseNonStreaming> {
-    const maxTokens = request.max_tokens ?? options?.maxTokens;
+    const maxTokens = request.max_tokens ?? options?.maxTokens
     const response = await client.chat.completions.create(
       {
         model: request.model,
         messages: request.messages.map((m) =>
           OpenAIMessageAdapter.parseRequestMessage(m),
         ),
-        ...(request.model === 'o1' 
+        ...(request.model === 'o1'
           ? { max_completion_tokens: maxTokens }
-          : { max_tokens: maxTokens }
-        ),
+          : { max_tokens: maxTokens }),
         temperature: request.temperature,
         top_p: request.top_p,
         frequency_penalty: request.frequency_penalty,
@@ -53,17 +52,16 @@ export class OpenAIMessageAdapter {
     request: LLMRequestStreaming,
     options?: LLMOptions,
   ): Promise<AsyncIterable<LLMResponseStreaming>> {
-    const maxTokens = request.max_tokens ?? options?.maxTokens;
+    const maxTokens = request.max_tokens ?? options?.maxTokens
     const stream = await client.chat.completions.create(
       {
         model: request.model,
         messages: request.messages.map((m) =>
           OpenAIMessageAdapter.parseRequestMessage(m),
         ),
-        ...(request.model === 'o1' 
+        ...(request.model === 'o1'
           ? { max_completion_tokens: maxTokens }
-          : { max_tokens: maxTokens }
-        ),
+          : { max_tokens: maxTokens }),
         temperature: request.temperature,
         top_p: request.top_p,
         frequency_penalty: request.frequency_penalty,

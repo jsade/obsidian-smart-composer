@@ -30,7 +30,10 @@ export default function AddChatModelModalRoot({
   )
 
   const handleSubmit = async () => {
-    if (!existingModel && plugin.settings.chatModels.some((p) => p.id === formData.id)) {
+    if (
+      !existingModel &&
+      plugin.settings.chatModels.some((p) => p.id === formData.id)
+    ) {
       new Notice('Model with this ID already exists. Try a different ID.')
       return
     }
@@ -55,7 +58,7 @@ export default function AddChatModelModalRoot({
       await plugin.setSettings({
         ...plugin.settings,
         chatModels: plugin.settings.chatModels.map((model) =>
-          model.id === existingModel.id ? formData : model
+          model.id === existingModel.id ? formData : model,
         ),
       })
     } else {
@@ -125,9 +128,11 @@ export default function AddChatModelModalRoot({
       {formData.providerType === 'openai' && (
         <ObsidianSetting
           name="Max Tokens"
-          desc={formData.model === 'o1' 
-            ? "Maximum number of tokens to generate (will be sent as max_completion_tokens for o1 model). Leave empty for default."
-            : "Maximum number of tokens to generate. Leave empty for default."}
+          desc={
+            formData.model === 'o1'
+              ? 'Maximum number of tokens to generate (will be sent as max_completion_tokens for o1 model). Leave empty for default.'
+              : 'Maximum number of tokens to generate. Leave empty for default.'
+          }
         >
           <ObsidianTextInput
             value={formData.maxTokens?.toString() ?? ''}
@@ -144,7 +149,11 @@ export default function AddChatModelModalRoot({
       )}
 
       <ObsidianSetting>
-        <ObsidianButton text={existingModel ? "Save" : "Add"} onClick={handleSubmit} cta />
+        <ObsidianButton
+          text={existingModel ? 'Save' : 'Add'}
+          onClick={handleSubmit}
+          cta
+        />
         <ObsidianButton text="Cancel" onClick={onClose} />
       </ObsidianSetting>
     </>

@@ -39,4 +39,4 @@ export class EditChatModelModal extends Modal {
     const { contentEl } = this
     contentEl.empty()
   }
-} 
+}
