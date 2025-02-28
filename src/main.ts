@@ -10,8 +10,8 @@ import { RAGEngine } from './core/rag/ragEngine'
 import { DatabaseManager } from './database/DatabaseManager'
 import { PGLiteAbortedException } from './database/exception'
 import {
-    SmartComposerSettings,
-    smartComposerSettingsSchema,
+  SmartComposerSettings,
+  smartComposerSettingsSchema,
 } from './settings/schema/setting.types'
 import { parseSmartComposerSettings } from './settings/schema/settings'
 import { SmartComposerSettingTab } from './settings/SettingTab'
@@ -50,9 +50,6 @@ export default class SmartComposerPlugin extends Plugin {
         this.selectionToolbarManager?.removeToolbar()
       }
     })
-
-    // Load selection toolbar CSS
-    this.loadStyles()
 
     this.registerView(CHAT_VIEW_TYPE, (leaf) => new ChatView(leaf, this))
     this.registerView(APPLY_VIEW_TYPE, (leaf) => new ApplyView(leaf))
@@ -331,23 +328,5 @@ ${validationResult.error.issues.map((v) => v.message).join('\n')}`)
     }
 
     return this.ragEngineInitPromise
-  }
-
-  // Load styles for the selection toolbar
-  private loadStyles() {
-    const styleEl = document.createElement('style')
-    styleEl.id = 'smtcmp-selection-toolbar-styles'
-    document.head.appendChild(styleEl)
-
-    // Import the CSS file
-    const cssPath = `${this.manifest.dir ?? ''}/styles/selection-toolbar.css`
-    fetch(cssPath)
-      .then((response) => response.text())
-      .then((css) => {
-        styleEl.textContent = css
-      })
-      .catch((error) => {
-        console.error('Failed to load selection toolbar styles:', error)
-      })
   }
 }

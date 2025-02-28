@@ -1,6 +1,5 @@
-import { Copy } from 'lucide-react'
 import { Editor, MarkdownView, Menu, Notice, Plugin } from 'obsidian'
-import { createElement, useEffect } from 'react'
+import { createElement, useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 
 import SmartComposerPlugin from '../../main'
@@ -9,6 +8,9 @@ import SmartComposerPlugin from '../../main'
 const SELECTION_TOOLBAR_CLASSES = {
   CONTAINER: 'smtcmp-selection-toolbar',
   BUTTON: 'smtcmp-selection-toolbar-button',
+  COMPACT: 'smtcmp-selection-toolbar-compact',
+  ICON: 'smtcmp-selection-toolbar-icon',
+  TEXT: 'smtcmp-selection-toolbar-text',
 }
 
 // Component for the inline button
@@ -23,6 +25,8 @@ function SelectionToolbar({
   plugin: SmartComposerPlugin
   onClose: () => void
 }) {
+  const [position, setPosition] = useState({ top: 0, left: 0 })
+
   const handlePasteToChat = async () => {
     await plugin.addSelectionToChat(editor, view)
     onClose() // Close the toolbar after action
@@ -52,10 +56,11 @@ function SelectionToolbar({
     const range = domSelection.getRangeAt(0)
     const rect = range.getBoundingClientRect()
 
-    // Position above the selection
-    const toolbarEl = toolbar as HTMLElement
-    toolbarEl.style.top = `${rect.top - 40}px`
-    toolbarEl.style.left = `${rect.left}px`
+    // Set position values for the toolbar
+    setPosition({
+      top: rect.top,
+      left: rect.left,
+    })
 
     // When selection changes, close the toolbar
     const handleSelectionChange = () => {
@@ -71,14 +76,24 @@ function SelectionToolbar({
   }, [editor, onClose])
 
   return (
-    <div className={SELECTION_TOOLBAR_CLASSES.CONTAINER}>
+    <div
+      className={`${SELECTION_TOOLBAR_CLASSES.CONTAINER} ${SELECTION_TOOLBAR_CLASSES.COMPACT}`}
+      style={
+        {
+          '--selection-top': `${position.top}px`,
+          '--selection-left': `${position.left}px`,
+        } as React.CSSProperties
+      }
+    >
       <button
         className={SELECTION_TOOLBAR_CLASSES.BUTTON}
         onClick={handlePasteToChat}
         title="Paste to Smart Composer chat"
       >
-        <Copy size={16} />
-        <span>Add to Chat</span>
+{/*         <span className={SELECTION_TOOLBAR_CLASSES.ICON}>
+          <Copy size={14} />
+        </span> */}
+        <span className={SELECTION_TOOLBAR_CLASSES.TEXT}>Add to Chat</span>
       </button>
     </div>
   )

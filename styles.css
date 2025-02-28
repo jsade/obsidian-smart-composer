@@ -1309,29 +1309,55 @@ button.smtcmp-chat-input-model-select {
   position: fixed;
   z-index: 999;
   background-color: var(--background-primary);
-  border: 1px solid var(--background-modifier-border);
-  border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  padding: 4px;
+  /* border: 1px solid var(--background-modifier-border); */
+  border: 0px;
+  border-radius: 1px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.08);
+  padding: 3px;
   animation: fade-in 0.2s ease-out;
+  opacity: 0.9;
+  top: calc(var(--selection-top) - 21px);
+  left: calc(var(--selection-left) - 0px);
 }
 
 .smtcmp-selection-toolbar-button {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
-  border-radius: 4px;
+  gap: 1px;
+  padding: 0px 0px;
+  border-radius: 0px;
   background-color: transparent;
   border: none;
   color: var(--text-normal);
-  font-size: 14px;
+  font-size: var(--font-smallest);
   cursor: pointer;
   transition: background-color 0.2s ease;
+  height: calc(var(--font-smallest) + 4px);
+  padding: 0px 2px;
+}
+
+
+.smtcmp-selection-toolbar-compact {
+  transform: scale(0.95);
+  max-width: fit-content;
+}
+
+.smtcmp-selection-toolbar-icon {
+  visibility: hidden;
+  font-size: var(--font-smallest);
+  opacity: 0.8;
+}
+
+.smtcmp-selection-toolbar-text {
+  font-weight: normal;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .smtcmp-selection-toolbar-button:hover {
   background-color: var(--background-modifier-hover);
+  opacity: 1;
 }
 
 @keyframes fade-in {
@@ -1340,7 +1366,7 @@ button.smtcmp-chat-input-model-select {
     transform: translateY(-5px);
   }
   to {
-    opacity: 1;
+    opacity: 0.9;
     transform: translateY(0);
   }
 }
