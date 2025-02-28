@@ -6,6 +6,7 @@ import { ObsidianSetting } from '../common/ObsidianSetting'
 
 import { ChatSection } from './sections/ChatSection'
 import { EtcSection } from './sections/EtcSection'
+import { MemoryTrackerSection } from './sections/MemoryTrackerSection'
 import { ModelsSection } from './sections/ModelsSection'
 import { ProvidersSection } from './sections/ProvidersSection'
 import { RAGSection } from './sections/RAGSection'
@@ -36,6 +37,7 @@ export function SettingsTabRoot({ app, plugin }: SettingsTabRootProps) {
       <ModelsSection app={app} plugin={plugin} />
       <ChatSection />
       <RAGSection app={app} plugin={plugin} />
+      <MemoryTrackerSection app={app} plugin={plugin} />
       <EtcSection app={app} plugin={plugin} />
     </>
   )

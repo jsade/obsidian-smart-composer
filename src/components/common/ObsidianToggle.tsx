@@ -3,12 +3,17 @@ import { useEffect, useRef, useState } from 'react'
 
 import { useObsidianSetting } from './ObsidianSetting'
 
-type ObsidianToggleProps = {
+export type ObsidianToggleProps = {
   value: boolean
   onChange: (value: boolean) => void
+  disabled?: boolean
 }
 
-export function ObsidianToggle({ value, onChange }: ObsidianToggleProps) {
+export function ObsidianToggle({ 
+  value, 
+  onChange, 
+  disabled = false 
+}: ObsidianToggleProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const { setting } = useObsidianSetting()
   const [toggleComponent, setToggleComponent] =
@@ -19,6 +24,10 @@ export function ObsidianToggle({ value, onChange }: ObsidianToggleProps) {
       let newToggleComponent: ToggleComponent | null = null
       setting.addToggle((component) => {
         newToggleComponent = component
+        
+        if (disabled) {
+          newToggleComponent.toggleEl.toggleAttribute('disabled', true)
+        }
       })
       setToggleComponent(newToggleComponent)
 
@@ -27,20 +36,28 @@ export function ObsidianToggle({ value, onChange }: ObsidianToggleProps) {
       }
     } else if (containerRef.current) {
       const newToggleComponent = new ToggleComponent(containerRef.current)
+      
+      if (disabled) {
+        newToggleComponent.toggleEl.toggleAttribute('disabled', true)
+      }
+      
       setToggleComponent(newToggleComponent)
 
       return () => {
         newToggleComponent?.toggleEl.remove()
       }
     }
-  }, [setting])
+  }, [setting, disabled])
 
   useEffect(() => {
     if (!toggleComponent) return
 
     toggleComponent.setValue(value)
     toggleComponent.onChange(onChange)
-  }, [toggleComponent, value, onChange])
+    
+    // Handle disabled state
+    toggleComponent.toggleEl.toggleAttribute('disabled', disabled)
+  }, [toggleComponent, value, onChange, disabled])
 
   return <div ref={containerRef} />
 }

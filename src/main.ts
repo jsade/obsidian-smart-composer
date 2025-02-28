@@ -9,11 +9,12 @@ import { RAGEngine } from './core/rag/ragEngine'
 import { DatabaseManager } from './database/DatabaseManager'
 import { PGLiteAbortedException } from './database/exception'
 import {
-  SmartComposerSettings,
-  smartComposerSettingsSchema,
+    SmartComposerSettings,
+    smartComposerSettingsSchema,
 } from './settings/schema/setting.types'
 import { parseSmartComposerSettings } from './settings/schema/settings'
 import { SmartComposerSettingTab } from './settings/SettingTab'
+import { MemoryTracker } from './utils/memoryTracker'
 import { getMentionableBlockData } from './utils/obsidian'
 
 export default class SmartComposerPlugin extends Plugin {
@@ -24,9 +25,13 @@ export default class SmartComposerPlugin extends Plugin {
   ragEngine: RAGEngine | null = null
   private dbManagerInitPromise: Promise<DatabaseManager> | null = null
   private ragEngineInitPromise: Promise<RAGEngine> | null = null
+  private memoryTracker: MemoryTracker | null = null
 
   async onload() {
     await this.loadSettings()
+    
+    // Initialize memory tracker
+    this.initMemoryTracker()
 
     this.registerView(CHAT_VIEW_TYPE, (leaf) => new ChatView(leaf, this))
     this.registerView(APPLY_VIEW_TYPE, (leaf) => new ApplyView(leaf))
@@ -113,11 +118,62 @@ export default class SmartComposerPlugin extends Plugin {
       },
     })
 
+    // Add a command to check memory usage immediately
+    this.addCommand({
+      id: 'check-memory-usage',
+      name: 'Check memory usage',
+      callback: () => {
+        this.memoryTracker?.logNow()
+      },
+    })
+
     // This adds a settings tab so the user can configure various aspects of the plugin
     this.addSettingTab(new SmartComposerSettingTab(this.app, this))
   }
 
+  /**
+   * Initialize the memory tracker with appropriate settings
+   */
+  initMemoryTracker() {
+    // Stop any existing tracker
+    if (this.memoryTracker) {
+      this.memoryTracker.stop();
+      this.memoryTracker = null;
+    }
+    
+    // Only create a new tracker if enabled in settings
+    if (!this.settings.memoryTrackerOptions.enabled) {
+      console.log('Memory tracking disabled in settings');
+      return;
+    }
+    
+    this.memoryTracker = new MemoryTracker(this, {
+      intervalMs: this.settings.memoryTrackerOptions.intervalMs,
+      memoryThresholdPercentage: this.settings.memoryTrackerOptions.memoryThresholdPercentage,
+      debugMode: this.settings.memoryTrackerOptions.debugMode,
+      maxHistoryLength: this.settings.memoryTrackerOptions.maxHistoryLength,
+    });
+    
+    // Start tracking memory usage
+    this.memoryTracker.start();
+    
+    console.log('Memory tracking initialized for Smart Composer plugin');
+  }
+
+  /**
+   * Get the memory tracker instance (for use by other components)
+   */
+  getMemoryTracker(): MemoryTracker | null {
+    return this.memoryTracker;
+  }
+
   onunload() {
+    // Stop memory tracking when plugin is unloaded
+    if (this.memoryTracker) {
+      this.memoryTracker.stop();
+      this.memoryTracker = null;
+    }
+    
     this.dbManager?.cleanup()
     this.dbManager = null
   }

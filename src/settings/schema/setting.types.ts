@@ -1,9 +1,9 @@
 import { z } from 'zod'
 
 import {
-  DEFAULT_CHAT_MODELS,
-  DEFAULT_EMBEDDING_MODELS,
-  DEFAULT_PROVIDERS,
+    DEFAULT_CHAT_MODELS,
+    DEFAULT_EMBEDDING_MODELS,
+    DEFAULT_PROVIDERS,
 } from '../../constants'
 import { chatModelSchema } from '../../types/chat-model.types'
 import { embeddingModelSchema } from '../../types/embedding-model.types'
@@ -16,6 +16,14 @@ const ragOptionsSchema = z.object({
   limit: z.number().catch(10),
   excludePatterns: z.array(z.string()).catch([]),
   includePatterns: z.array(z.string()).catch([]),
+})
+
+const memoryTrackerOptionsSchema = z.object({
+  enabled: z.boolean().catch(true),
+  debugMode: z.boolean().catch(false),
+  intervalMs: z.number().catch(5 * 60 * 1000), // Default: 5 minutes
+  memoryThresholdPercentage: z.number().catch(80),
+  maxHistoryLength: z.number().catch(100),
 })
 
 export const SETTINGS_SCHEMA_VERSION = 4
@@ -56,6 +64,15 @@ export const smartComposerSettingsSchema = z.object({
     limit: 10,
     excludePatterns: [],
     includePatterns: [],
+  }),
+  
+  // Memory Tracker Options
+  memoryTrackerOptions: memoryTrackerOptionsSchema.catch({
+    enabled: true,
+    debugMode: false,
+    intervalMs: 5 * 60 * 1000,
+    memoryThresholdPercentage: 80,
+    maxHistoryLength: 100,
   }),
 })
 export type SmartComposerSettings = z.infer<typeof smartComposerSettingsSchema>
