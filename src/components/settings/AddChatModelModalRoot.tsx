@@ -129,8 +129,8 @@ export default function AddChatModelModalRoot({
         <ObsidianSetting
           name="Max Tokens"
           desc={
-            formData.model === 'o1'
-              ? 'Maximum number of tokens to generate (will be sent as max_completion_tokens for o1 model). Leave empty for default.'
+            formData.model.startsWith('o')
+              ? 'Maximum number of tokens to generate (will be sent as max_completion_tokens for o-prefix models). Leave empty for default.'
               : 'Maximum number of tokens to generate. Leave empty for default.'
           }
         >

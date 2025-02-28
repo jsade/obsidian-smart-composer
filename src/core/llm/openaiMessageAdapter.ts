@@ -30,7 +30,7 @@ export class OpenAIMessageAdapter {
         messages: request.messages.map((m) =>
           OpenAIMessageAdapter.parseRequestMessage(m),
         ),
-        ...(request.model === 'o1'
+        ...(request.model.startsWith('o')
           ? { max_completion_tokens: maxTokens }
           : { max_tokens: maxTokens }),
         temperature: request.temperature,
@@ -59,7 +59,7 @@ export class OpenAIMessageAdapter {
         messages: request.messages.map((m) =>
           OpenAIMessageAdapter.parseRequestMessage(m),
         ),
-        ...(request.model === 'o1'
+        ...(request.model.startsWith('o')
           ? { max_completion_tokens: maxTokens }
           : { max_tokens: maxTokens }),
         temperature: request.temperature,
