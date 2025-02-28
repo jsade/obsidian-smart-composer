@@ -1,7 +1,7 @@
 import {
-    DEFAULT_CHAT_MODELS,
-    DEFAULT_EMBEDDING_MODELS,
-    DEFAULT_PROVIDERS,
+  DEFAULT_CHAT_MODELS,
+  DEFAULT_EMBEDDING_MODELS,
+  DEFAULT_PROVIDERS,
 } from '../../constants'
 
 import { SETTINGS_SCHEMA_VERSION } from './setting.types'
@@ -32,7 +32,7 @@ describe('parseSmartComposerSettings', () => {
         excludePatterns: [],
         includePatterns: [],
       },
-      
+
       memoryTrackerOptions: {
         enabled: true,
         debugMode: false,

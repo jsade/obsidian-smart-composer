@@ -1,9 +1,9 @@
 import { z } from 'zod'
 
 import {
-    DEFAULT_CHAT_MODELS,
-    DEFAULT_EMBEDDING_MODELS,
-    DEFAULT_PROVIDERS,
+  DEFAULT_CHAT_MODELS,
+  DEFAULT_EMBEDDING_MODELS,
+  DEFAULT_PROVIDERS,
 } from '../../constants'
 import { chatModelSchema } from '../../types/chat-model.types'
 import { embeddingModelSchema } from '../../types/embedding-model.types'
@@ -65,7 +65,7 @@ export const smartComposerSettingsSchema = z.object({
     excludePatterns: [],
     includePatterns: [],
   }),
-  
+
   // Memory Tracker Options
   memoryTrackerOptions: memoryTrackerOptionsSchema.catch({
     enabled: true,

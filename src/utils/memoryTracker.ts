@@ -1,26 +1,26 @@
-import { Plugin } from 'obsidian';
+import { Plugin } from 'obsidian'
 
 /**
  * MemoryUsageInfo interface for storing memory usage data
  */
 type MemoryUsageInfo = {
-  timestamp: number;
-  usedJSHeapSize: number;
-  totalJSHeapSize: number;
-  jsHeapSizeLimit: number;
+  timestamp: number
+  usedJSHeapSize: number
+  totalJSHeapSize: number
+  jsHeapSizeLimit: number
 }
 
 /**
  * Memory statistics including growth rates
  */
 type MemoryStats = {
-  currentUsedMB: number;
-  currentTotalMB: number;
-  limitMB: number;
-  usagePercentage: number;
-  growthRateMBPerMinute: number;
-  timeWindowMinutes: number;
-  measurements: number;
+  currentUsedMB: number
+  currentTotalMB: number
+  limitMB: number
+  usagePercentage: number
+  growthRateMBPerMinute: number
+  timeWindowMinutes: number
+  measurements: number
 }
 
 /**
@@ -28,38 +28,38 @@ type MemoryStats = {
  * Helps identify memory leaks by tracking JS heap memory usage over time
  */
 export class MemoryTracker {
-  private plugin: Plugin;
-  private memoryHistory: MemoryUsageInfo[] = [];
-  private checkInterval: NodeJS.Timeout | null = null;
-  private maxHistoryLength = 100; // Maximum number of history entries to keep
-  private intervalMs: number;
-  private debugMode: boolean;
-  private lastLogTime = 0;
-  private memoryThresholdPercentage: number;
-  
+  private plugin: Plugin
+  private memoryHistory: MemoryUsageInfo[] = []
+  private checkInterval: NodeJS.Timeout | null = null
+  private maxHistoryLength = 100 // Maximum number of history entries to keep
+  private intervalMs: number
+  private debugMode: boolean
+  private lastLogTime = 0
+  private memoryThresholdPercentage: number
+
   /**
    * Create a new MemoryTracker instance
    * @param plugin The Obsidian plugin instance
    * @param options Configuration options
    */
   constructor(
-    plugin: Plugin, 
+    plugin: Plugin,
     options: {
       /** Interval in milliseconds between memory checks */
-      intervalMs?: number;
+      intervalMs?: number
       /** Whether to log all measurements to console */
-      debugMode?: boolean;
+      debugMode?: boolean
       /** Maximum history length to store */
-      maxHistoryLength?: number;
+      maxHistoryLength?: number
       /** Threshold percentage at which to issue warnings */
-      memoryThresholdPercentage?: number;
-    } = {}
+      memoryThresholdPercentage?: number
+    } = {},
   ) {
-    this.plugin = plugin;
-    this.intervalMs = options.intervalMs || 60000; // Default: check every minute
-    this.debugMode = options.debugMode || false;
-    this.maxHistoryLength = options.maxHistoryLength || 100;
-    this.memoryThresholdPercentage = options.memoryThresholdPercentage || 80;
+    this.plugin = plugin
+    this.intervalMs = options.intervalMs ?? 60000 // Default: check every minute
+    this.debugMode = options.debugMode ?? false
+    this.maxHistoryLength = options.maxHistoryLength ?? 100
+    this.memoryThresholdPercentage = options.memoryThresholdPercentage ?? 80
   }
 
   /**
@@ -67,17 +67,17 @@ export class MemoryTracker {
    */
   start(): void {
     if (this.checkInterval) {
-      this.stop(); // Clear any existing interval
+      this.stop() // Clear any existing interval
     }
 
     this.checkInterval = setInterval(() => {
-      this.checkMemoryUsage();
-    }, this.intervalMs);
+      this.checkMemoryUsage()
+    }, this.intervalMs)
 
     // Run an initial check immediately
-    this.checkMemoryUsage();
-    
-    console.log('Memory tracking started');
+    this.checkMemoryUsage()
+
+    console.log('Memory tracking started')
   }
 
   /**
@@ -85,9 +85,9 @@ export class MemoryTracker {
    */
   stop(): void {
     if (this.checkInterval) {
-      clearInterval(this.checkInterval);
-      this.checkInterval = null;
-      console.log('Memory tracking stopped');
+      clearInterval(this.checkInterval)
+      this.checkInterval = null
+      console.log('Memory tracking stopped')
     }
   }
 
@@ -95,39 +95,47 @@ export class MemoryTracker {
    * Check current memory usage and record it
    */
   private checkMemoryUsage(): void {
-    if (!window.performance || !(performance as any).memory) {
-      console.log('Performance memory API not available');
-      return;
+    if (!window.performance || !('memory' in performance)) {
+      console.log('Performance memory API not available')
+      return
     }
 
-    const memoryInfo = (performance as any).memory;
-    
+    // Define a type for the Chrome memory API
+    type PerformanceMemory = {
+      usedJSHeapSize: number
+      totalJSHeapSize: number
+      jsHeapSizeLimit: number
+    }
+
+    const memoryInfo = (performance as unknown as { memory: PerformanceMemory })
+      .memory
+
     // Record memory usage data
     this.memoryHistory.push({
       timestamp: Date.now(),
       usedJSHeapSize: memoryInfo.usedJSHeapSize,
       totalJSHeapSize: memoryInfo.totalJSHeapSize,
-      jsHeapSizeLimit: memoryInfo.jsHeapSizeLimit
-    });
-    
+      jsHeapSizeLimit: memoryInfo.jsHeapSizeLimit,
+    })
+
     // Keep history size within limit
     if (this.memoryHistory.length > this.maxHistoryLength) {
-      this.memoryHistory.shift();
+      this.memoryHistory.shift()
     }
-    
+
     // Calculate stats and log if in debug mode
-    const stats = this.calculateStats();
+    const stats = this.calculateStats()
     if (this.debugMode) {
-      this.logMemoryStats(stats);
+      this.logMemoryStats(stats)
     }
-    
+
     // Always log if memory usage is high
     if (stats.usagePercentage >= this.memoryThresholdPercentage) {
       // Limit logging to once every 5 minutes for high memory warnings
-      const now = Date.now();
+      const now = Date.now()
       if (now - this.lastLogTime >= 5 * 60 * 1000) {
-        this.lastLogTime = now;
-        this.logHighMemoryWarning(stats);
+        this.lastLogTime = now
+        this.logHighMemoryWarning(stats)
       }
     }
   }
@@ -136,29 +144,31 @@ export class MemoryTracker {
    * Calculate memory statistics based on recorded history
    */
   private calculateStats(): MemoryStats {
-    const latest = this.memoryHistory[this.memoryHistory.length - 1];
-    
+    const latest = this.memoryHistory[this.memoryHistory.length - 1]
+
     // Calculate values in MB
-    const currentUsedMB = Math.round(latest.usedJSHeapSize / (1024 * 1024));
-    const currentTotalMB = Math.round(latest.totalJSHeapSize / (1024 * 1024));
-    const limitMB = Math.round(latest.jsHeapSizeLimit / (1024 * 1024));
-    const usagePercentage = Math.round((latest.usedJSHeapSize / latest.jsHeapSizeLimit) * 100);
-    
+    const currentUsedMB = Math.round(latest.usedJSHeapSize / (1024 * 1024))
+    const currentTotalMB = Math.round(latest.totalJSHeapSize / (1024 * 1024))
+    const limitMB = Math.round(latest.jsHeapSizeLimit / (1024 * 1024))
+    const usagePercentage = Math.round(
+      (latest.usedJSHeapSize / latest.jsHeapSizeLimit) * 100,
+    )
+
     // Calculate growth rate if we have enough history
-    let growthRateMBPerMinute = 0;
-    let timeWindowMinutes = 0;
-    
+    let growthRateMBPerMinute = 0
+    let timeWindowMinutes = 0
+
     if (this.memoryHistory.length > 1) {
-      const oldest = this.memoryHistory[0];
-      timeWindowMinutes = (latest.timestamp - oldest.timestamp) / (1000 * 60);
-      
+      const oldest = this.memoryHistory[0]
+      timeWindowMinutes = (latest.timestamp - oldest.timestamp) / (1000 * 60)
+
       if (timeWindowMinutes > 0) {
-        const usedHeapDifferenceMB = 
-          (latest.usedJSHeapSize - oldest.usedJSHeapSize) / (1024 * 1024);
-        growthRateMBPerMinute = usedHeapDifferenceMB / timeWindowMinutes;
+        const usedHeapDifferenceMB =
+          (latest.usedJSHeapSize - oldest.usedJSHeapSize) / (1024 * 1024)
+        growthRateMBPerMinute = usedHeapDifferenceMB / timeWindowMinutes
       }
     }
-    
+
     return {
       currentUsedMB,
       currentTotalMB,
@@ -166,8 +176,8 @@ export class MemoryTracker {
       usagePercentage,
       growthRateMBPerMinute,
       timeWindowMinutes,
-      measurements: this.memoryHistory.length
-    };
+      measurements: this.memoryHistory.length,
+    }
   }
 
   /**
@@ -180,8 +190,8 @@ export class MemoryTracker {
       - Total JS Heap: ${stats.currentTotalMB} MB
       - JS Heap Limit: ${stats.limitMB} MB
       - Growth Rate: ${stats.growthRateMBPerMinute.toFixed(2)} MB/minute over last ${stats.timeWindowMinutes.toFixed(1)} minutes
-      - Measurements: ${stats.measurements}`
-    );
+      - Measurements: ${stats.measurements}`,
+    )
   }
 
   /**
@@ -193,8 +203,8 @@ export class MemoryTracker {
       Used: ${stats.currentUsedMB} MB (${stats.usagePercentage}% of ${stats.limitMB} MB limit)
       Growth Rate: ${stats.growthRateMBPerMinute.toFixed(2)} MB/minute
       
-      Possible memory leak detected. Consider restarting Obsidian if performance degrades.`
-    );
+      Possible memory leak detected. Consider restarting Obsidian if performance degrades.`,
+    )
   }
 
   /**
@@ -203,26 +213,26 @@ export class MemoryTracker {
   getMemoryStats(): MemoryStats {
     // Force a memory check if we don't have any data yet
     if (this.memoryHistory.length === 0) {
-      this.checkMemoryUsage();
+      this.checkMemoryUsage()
     }
-    
-    return this.calculateStats();
+
+    return this.calculateStats()
   }
 
   /**
    * Clear memory history
    */
   clearHistory(): void {
-    this.memoryHistory = [];
-    console.log('Memory tracking history cleared');
+    this.memoryHistory = []
+    console.log('Memory tracking history cleared')
   }
 
   /**
    * Log the current memory usage immediately
    */
   logNow(): void {
-    this.checkMemoryUsage();
-    const stats = this.calculateStats();
-    this.logMemoryStats(stats);
+    this.checkMemoryUsage()
+    const stats = this.calculateStats()
+    this.logMemoryStats(stats)
   }
-} 
+}

@@ -3,6 +3,7 @@ import { Editor, MarkdownView, Notice, Plugin } from 'obsidian'
 import { ApplyView } from './ApplyView'
 import { ChatView } from './ChatView'
 import { ChatProps } from './components/chat-view/Chat'
+import { SelectionToolbarManager } from './components/editor/SelectionToolbar'
 import { InstallerUpdateRequiredModal } from './components/modals/InstallerUpdateRequiredModal'
 import { APPLY_VIEW_TYPE, CHAT_VIEW_TYPE } from './constants'
 import { RAGEngine } from './core/rag/ragEngine'
@@ -26,12 +27,32 @@ export default class SmartComposerPlugin extends Plugin {
   private dbManagerInitPromise: Promise<DatabaseManager> | null = null
   private ragEngineInitPromise: Promise<RAGEngine> | null = null
   private memoryTracker: MemoryTracker | null = null
+  private selectionToolbarManager: SelectionToolbarManager | null = null
 
   async onload() {
     await this.loadSettings()
-    
+
     // Initialize memory tracker
     this.initMemoryTracker()
+
+    // Initialize selection toolbar manager
+    this.selectionToolbarManager = new SelectionToolbarManager(this)
+
+    // Register the context menu
+    this.selectionToolbarManager.registerContextMenu(this)
+
+    // Register document-level selection event instead of editor-specific event
+    this.registerDomEvent(document, 'selectionchange', () => {
+      const activeView = this.app.workspace.getActiveViewOfType(MarkdownView)
+      if (activeView?.editor?.somethingSelected()) {
+        this.selectionToolbarManager?.showToolbar(activeView.editor, activeView)
+      } else {
+        this.selectionToolbarManager?.removeToolbar()
+      }
+    })
+
+    // Load selection toolbar CSS
+    this.loadStyles()
 
     this.registerView(CHAT_VIEW_TYPE, (leaf) => new ChatView(leaf, this))
     this.registerView(APPLY_VIEW_TYPE, (leaf) => new ApplyView(leaf))
@@ -137,45 +158,47 @@ export default class SmartComposerPlugin extends Plugin {
   initMemoryTracker() {
     // Stop any existing tracker
     if (this.memoryTracker) {
-      this.memoryTracker.stop();
-      this.memoryTracker = null;
+      this.memoryTracker.stop()
+      this.memoryTracker = null
     }
-    
+
     // Only create a new tracker if enabled in settings
     if (!this.settings.memoryTrackerOptions.enabled) {
-      console.log('Memory tracking disabled in settings');
-      return;
+      console.log('Memory tracking disabled in settings')
+      return
     }
-    
+
     this.memoryTracker = new MemoryTracker(this, {
       intervalMs: this.settings.memoryTrackerOptions.intervalMs,
-      memoryThresholdPercentage: this.settings.memoryTrackerOptions.memoryThresholdPercentage,
+      memoryThresholdPercentage:
+        this.settings.memoryTrackerOptions.memoryThresholdPercentage,
       debugMode: this.settings.memoryTrackerOptions.debugMode,
       maxHistoryLength: this.settings.memoryTrackerOptions.maxHistoryLength,
-    });
-    
+    })
+
     // Start tracking memory usage
-    this.memoryTracker.start();
-    
-    console.log('Memory tracking initialized for Smart Composer plugin');
+    this.memoryTracker.start()
+
+    console.log('Memory tracking initialized for Smart Composer plugin')
   }
 
   /**
    * Get the memory tracker instance (for use by other components)
    */
   getMemoryTracker(): MemoryTracker | null {
-    return this.memoryTracker;
+    return this.memoryTracker
   }
 
   onunload() {
     // Stop memory tracking when plugin is unloaded
     if (this.memoryTracker) {
-      this.memoryTracker.stop();
-      this.memoryTracker = null;
+      this.memoryTracker.stop()
+      this.memoryTracker = null
     }
-    
+
     this.dbManager?.cleanup()
     this.dbManager = null
+    this.selectionToolbarManager?.removeToolbar()
   }
 
   async loadSettings() {
@@ -308,5 +331,23 @@ ${validationResult.error.issues.map((v) => v.message).join('\n')}`)
     }
 
     return this.ragEngineInitPromise
+  }
+
+  // Load styles for the selection toolbar
+  private loadStyles() {
+    const styleEl = document.createElement('style')
+    styleEl.id = 'smtcmp-selection-toolbar-styles'
+    document.head.appendChild(styleEl)
+
+    // Import the CSS file
+    const cssPath = `${this.manifest.dir ?? ''}/styles/selection-toolbar.css`
+    fetch(cssPath)
+      .then((response) => response.text())
+      .then((css) => {
+        styleEl.textContent = css
+      })
+      .catch((error) => {
+        console.error('Failed to load selection toolbar styles:', error)
+      })
   }
 }

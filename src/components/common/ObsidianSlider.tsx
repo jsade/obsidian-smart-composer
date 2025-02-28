@@ -29,10 +29,8 @@ export function ObsidianSlider({
     if (setting) {
       let newSliderComponent: SliderComponent | null = null
       setting.addSlider((component) => {
-        newSliderComponent = component
-          .setLimits(min, max, step)
-          .setValue(value)
-        
+        newSliderComponent = component.setLimits(min, max, step).setValue(value)
+
         if (disabled) {
           newSliderComponent.sliderEl.toggleAttribute('disabled', true)
         }
@@ -46,28 +44,28 @@ export function ObsidianSlider({
       const newSliderComponent = new SliderComponent(containerRef.current)
         .setLimits(min, max, step)
         .setValue(value)
-      
+
       if (disabled) {
         newSliderComponent.sliderEl.toggleAttribute('disabled', true)
       }
-      
+
       setSliderComponent(newSliderComponent)
 
       return () => {
         newSliderComponent?.sliderEl.remove()
       }
     }
-  }, [setting, min, max, step, disabled])
+  }, [setting, min, max, step, disabled, value])
 
   useEffect(() => {
     if (!sliderComponent) return
 
     sliderComponent.setValue(value)
     sliderComponent.onChange(onChange)
-    
+
     // Handle disabled state
     sliderComponent.sliderEl.toggleAttribute('disabled', disabled)
   }, [sliderComponent, value, onChange, disabled])
 
   return <div ref={containerRef} />
-} 
+}
