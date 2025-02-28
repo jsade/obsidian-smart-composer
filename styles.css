@@ -151,7 +151,7 @@ button:not(.clickable-icon).smtcmp-chat-list-dropdown {
   flex-direction: column;
   gap: var(--size-4-1);
   padding: 0 var(--size-4-3) var(--size-4-5) var(--size-4-3);
-  margin: var(--size-4-2) calc(var(--size-4-3) * -1) 0;
+  margin: var(--size-4-2) calc(var(--size-4-3) * -1.5) 0;
 
   .smtcmp-chat-messages-user {
     display: flex;
@@ -159,7 +159,7 @@ button:not(.clickable-icon).smtcmp-chat-list-dropdown {
     gap: var(--size-4-1);
     background-color: var(--background-primary-alt);
     border-radius: var(--radius-m);
-    padding: var(--size-4-2);
+    padding: var(--size-4-1);
   }
 
   .smtcmp-chat-messages-assistant {
@@ -174,7 +174,8 @@ button:not(.clickable-icon).smtcmp-chat-list-dropdown {
 
 .obsidian-default-textarea {
   -webkit-app-region: no-drag;
-  background: var(--background-modifier-form-field);
+  /* background: var(--background-modifier-form-field); */
+  background-color: var(--background-primary-alt);
   color: var(--text-normal);
   font-family: inherit;
   padding: 0;
@@ -215,6 +216,7 @@ button:not(.clickable-icon).smtcmp-chat-list-dropdown {
   flex-direction: column;
   -webkit-app-region: no-drag;
   background: var(--background-modifier-form-field);
+  background-color: var(--background-primary-alt);
   border: var(--input-border-width) solid var(--background-modifier-border);
   color: var(--text-normal);
   font-family: inherit;
@@ -233,6 +235,9 @@ button:not(.clickable-icon).smtcmp-chat-list-dropdown {
 }
 
 .smtcmp-chat-user-input-files {
+  background-color: var(--background-primary-alt) !important;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
   display: flex;
   flex-direction: row;
   gap: var(--size-4-1);
@@ -361,11 +366,16 @@ button:not(.clickable-icon).smtcmp-chat-list-dropdown {
  * ChatUserInput
  */
 
+.smtcmp-lexical-content-editable-root {
+	background-color: var(--background-primary-alt) !important;
+  border-bottom-left-radius: 4px !important;
+  border-bottom-right-radius: 4px !important;
+}
+
+
 .smtcmp-lexical-content-editable-root .mention {
-  background-color: var(--tag-background);
-  color: var(--tag-color);
+
   padding: var(--size-2-1) calc(var(--size-2-1));
-  border-radius: var(--radius-s);
   background-color: var(--tag-background);
   color: var(--tag-color);
   padding: 0 calc(var(--size-2-1));
@@ -376,6 +386,7 @@ button:not(.clickable-icon).smtcmp-chat-list-dropdown {
 .smtcmp-lexical-content-editable-paragraph {
   margin: 0;
   line-height: 1.6;
+  background-color: var(--background-primary-alt) !important;
 }
 
 .smtcmp-popover {
@@ -425,7 +436,7 @@ button:not(.clickable-icon).smtcmp-chat-list-dropdown {
   z-index: 1000;
   max-height: 300px;
   overflow-y: auto;
-  background-color: var(--background-primary);
+  /* background-color: var(--background-primary); */
   border: 1px solid var(--background-modifier-border);
   margin: 0 8px 0 8px;
   padding: var(--size-2-3) var(--size-4-2);
@@ -437,7 +448,7 @@ button:not(.clickable-icon).smtcmp-chat-list-dropdown {
   align-content: center;
   flex-direction: row;
   flex-shrink: 0;
-  background-color: var(--background-primary);
+  background-color: var(--background-primary-alt);
   border-radius: 8px;
   border: 0;
   min-height: 20px;
@@ -1294,3 +1305,9 @@ button.smtcmp-chat-input-model-select {
 .smtcmp-settings-table-api-key:hover {
   text-decoration: underline;
 }
+
+
+
+
+
+
