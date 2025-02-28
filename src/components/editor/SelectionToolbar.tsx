@@ -90,7 +90,7 @@ function SelectionToolbar({
         onClick={handlePasteToChat}
         title="Paste to Smart Composer chat"
       >
-{/*         <span className={SELECTION_TOOLBAR_CLASSES.ICON}>
+        {/*         <span className={SELECTION_TOOLBAR_CLASSES.ICON}>
           <Copy size={14} />
         </span> */}
         <span className={SELECTION_TOOLBAR_CLASSES.TEXT}>Add to Chat</span>
@@ -149,18 +149,29 @@ export class SelectionToolbarManager {
         'editor-menu',
         (menu: Menu, editor: Editor, view: MarkdownView) => {
           if (editor.somethingSelected()) {
+            // Create a single Smart Composer menu item
             menu.addItem((item) => {
-              item
-                .setTitle('Smart Composer: Paste to active chat')
-                .setIcon('copy')
-                .onClick(async () => {
-                  await this.plugin.addSelectionToChat(editor, view)
-                  new Notice('Selection added to chat')
-                })
-            })
+              item.setTitle('Smart Composer').setIcon('copy');
+              
+              // Create submenu
+              const submenu = item.setSubmenu();
+              
+              // Add child menu item to the submenu
+              submenu.addItem((childItem) => {
+                childItem
+                  .setTitle('Paste to active chat')
+                  .setIcon('copy')
+                  .onClick(async () => {
+                    await this.plugin.addSelectionToChat(editor, view);
+                    new Notice('Selection added to chat');
+                  });
+              });
+              
+              // You can add more items to the submenu here
+            });
           }
-        },
-      ),
-    )
+        }
+      )
+    );
   }
 }
